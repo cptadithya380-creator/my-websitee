@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mini Games Collection — By [Your Name]</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* -------------------------
+       Base / Theme / Utilities
+       ------------------------- */
+    :root{
+      --bg: #0f1724;
+      --panel: #0b1220;
+      --muted: #94a3b8;
+      --accent: #6ee7b7;
+      --glass: rgba(255,255,255,0.03);
+      --glass-2: rgba(255,255,255,0.04);
+      --card-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      --glass-border: rgba(255,255,255,0.04);
+      --glass-hover: rgba(255,255,255,0.06);
+      color-scheme: dark;
+    }
+    [data-theme="light"]{
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --muted: #475569;
+      --accent: #0ea5a5;
+      --glass: rgba(2,6,23,0.02);
+      --glass-2: rgba(2,6,23,0.03);
+      --card-shadow: 0 8px 20px rgba(16,24,40,0.06);
+      --glass-border: rgba(2,6,23,0.04);
+      --glass-hover: rgba(2,6,23,0.04);
+      color-scheme: light;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,var(--bg), #071023 120%);
+      color: #e6eef8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:24px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+    }
+
+    /* Container */
+    .container{
+      width:100%;
+      max-width:1100px;
+      margin:12px auto;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    .brand{
+      display:flex;
+      gap:14px;
+      align-items:center;
+    }
+    .logo{
+      width:56px;
+      height:56px;
+      border-radius:12px;
+      background:linear-gradient(135deg,var(--accent), #7dd3fc);
+      box-shadow:var(--card-shadow);
+      display:grid;
+      place-items:center;
+      font-weight:700;
+      color:#052023;
+      font-size:20px;
+    }
+    h1{
+      margin:0;
+      font-size:20px;
+      font-weight:600;
+      letter-spacing:0.2px;
+    }
+    p.lead{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    /* Controls */
+    .controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .btn{
+      background:var(--glass);
+      border:1px solid var(--glass-border);
+      padding:8px 12px;
+      border-radius:10px;
+      color:inherit;
+      cursor:pointer;
+      font-weight:600;
+      backdrop-filter: blur(6px);
+      transition:transform .12s ease, background .12s ease;
+    }
+    .btn:hover{ transform:translateY(-3px); background:var(--glass-hover); }
+    .small{ padding:6px 9px; font-size:14px; }
+
+    /* Layout grid */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 340px;
+      gap:18px;
+    }
+    @media (max-width:1000px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    /* Left: games column */
+    .games{
+      display:grid;
+      gap:16px;
+    }
+
+    .card{
+      background:linear-gradient(180deg,var(--panel), rgba(255,255,255,0.02));
+      border-radius:14px;
+      padding:16px;
+      box-shadow:var(--card-shadow);
+      border:1px solid var(--glass-border);
+    }
+    .card h2{ margin:0 0 8px 0; font-size:18px; display:flex; align-items:center; gap:10px}
+    .muted{ color:var(--muted); font-size:13px; margin-bottom:10px }
+
+    /* Preloader (simple) */
+    #preloader{
+      position:fixed; inset:0; display:grid; place-items:center;
+      background:linear-gradient(180deg, rgba(2,6,23,0.9), rgba(2,6,23,0.95));
+      z-index:9999; transition:opacity .4s ease;
+    }
+    #preloader.hidden{opacity:0; pointer-events:none; display:none}
+
+    .loader {
+      width:80px;height:80px;border-radius:14px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--panel), #0b1530);
+      box-shadow:var(--card-shadow);
+      border:1px solid var(--glass-border);
+    }
+    .dot{
+      width:12px;height:12px;border-radius:50%;
+      background:var(--accent);
+      animation:pop 1s infinite ease-in-out;
+    }
+    .dot:nth-child(2){ animation-delay:.12s }
+    .dot:nth-child(3){ animation-delay:.24s }
+    @keyframes pop{
+      0%,100%{ transform:scale(.6); opacity:.5 }
+      50%{ transform:scale(1.3); opacity:1 }
+    }
+
+    /* Tic Tac Toe */
+    .ttt-board{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+      margin-top:10px;
+    }
+    .cell{
+      background:var(--glass);
+      border:1px solid var(--glass-border);
+      height:86px;
+      display:grid;
+      place-items:center;
+      font-size:34px;
+      font-weight:700;
+      border-radius:8px;
+      cursor:pointer;
+      transition:transform .08s ease, background .12s;
+      user-select:none;
+    }
+    .cell:hover{ transform:translateY(-4px); background:var(--glass-hover) }
+
+    .ttt-info{ display:flex; gap:8px; align-items:center; margin-top:10px; }
+
+    /* RPS */
+    .rps-row{ display:flex; gap:8px; margin-top:10px; justify-content:space-between; }
+    .rps-btn{
+      flex:1;
+      padding:12px;
+      background:var(--glass);
+      border:1px solid var(--glass-border);
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:16px;
+    }
+    .rps-result{ margin-top:10px; font-weight:700; font-size:16px }
+
+    /* Memory */
+    .memory-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-top:10px;
+    }
+    .card-tile{
+      height:86px;
+      border-radius:10px;
+      perspective:800px;
+      cursor:pointer;
+    }
+    .card-inner{
+      position:relative;
+      width:100%;
+      height:100%;
+      transform-style:preserve-3d;
+      transition:transform .5s;
+      border-radius:10px;
+    }
+    .card-front, .card-back{
+      position:absolute;
+      inset:0;
+      display:grid; place-items:center;
+      backface-visibility:hidden;
+      border-radius:10px;
+      font-weight:700;
+      font-size:20px;
+    }
+    .card-front{
+      background:var(--glass);
+      border:1px solid var(--glass-border);
+    }
+    .card-back{
+      background:linear-gradient(135deg,var(--accent), #7dd3fc);
+      color:#042023;
+      transform:rotateY(180deg);
+    }
+    .flipped .card-inner{ transform:rotateY(180deg) }
+    .matched .card-inner{ box-shadow: 0 8px 20px rgba(0,0,0,0.2); opacity:.85; }
+
+    /* Right: sidebar */
+    .sidebar{ display:flex; flex-direction:column; gap:12px; position:sticky; top:24px; align-self:start }
+    .sidebar .hint{ color:var(--muted); font-size:13px }
+
+    footer{ margin-top:18px; text-align:center; color:var(--muted); font-size:13px }
+
+    /* tiny responsive fixes */
+    @media (max-width:520px){
+      .cell{ height:64px; font-size:26px }
+      .card-back{ font-size:18px }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Preloader -->
+  <div id="preloader">
+    <div class="loader">
+      <div style="display:flex;gap:8px">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" id="app" data-theme="dark">
+    <header>
+      <div class="brand">
+        <div class="logo">MG</div>
+        <div>
+          <h1>Mini Games Collection</h1>
+          <p class="lead">Three small games — Tic-Tac-Toe, Rock-Paper-Scissors, Memory Match</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn small" id="toggle-theme" title="Toggle theme">Toggle Theme</button>
+        <button class="btn small" id="reset-all" title="Reset all games">Reset All</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <!-- LEFT: Games -->
+      <section class="games">
+        <!-- TIC TAC TOE -->
+        <article class="card" id="ticcard">
+          <h2>🎯 Tic-Tac-Toe</h2>
+          <p class="muted">Play vs another person. Click an empty cell to make your move. First to three in a row wins.</p>
+
+          <div class="ttt-board" id="ttt-board" aria-label="tic tac toe board">
+            <!-- 9 cells -->
+            <div class="cell" data-i="0"></div>
+            <div class="cell" data-i="1"></div>
+            <div class="cell" data-i="2"></div>
+            <div class="cell" data-i="3"></div>
+            <div class="cell" data-i="4"></div>
+            <div class="cell" data-i="5"></div>
+            <div class="cell" data-i="6"></div>
+            <div class="cell" data-i="7"></div>
+            <div class="cell" data-i="8"></div>
+          </div>
+
+          <div class="ttt-info">
+            <div id="ttt-status">Turn: <strong id="ttt-turn">X</strong></div>
+            <div style="margin-left:auto">
+              <button class="btn small" id="ttt-reset">Reset</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- ROCK PAPER SCISSORS -->
+        <article class="card" id="rpscard">
+          <h2>✊ Rock-Paper-Scissors</h2>
+          <p class="muted">Pick one. The computer will pick one too. Best of three rounds wins.</p>
+
+          <div class="rps-row">
+            <button class="rps-btn" data-move="rock">✊ Rock</button>
+            <button class="rps-btn" data-move="paper">✋ Paper</button>
+            <button class="rps-btn" data-move="scissors">✌️ Scissors</button>
+          </div>
+
+          <div class="rps-result" id="rps-result">Make your choice to begin.</div>
+          <div style="display:flex; gap:8px; margin-top:10px;">
+            <button class="btn small" id="rps-reset">Reset</button>
+            <div style="margin-left:auto" class="muted">You: <span id="rps-score-you">0</span> • Comp: <span id="rps-score-comp">0</span></div>
+          </div>
+        </article>
+
+        <!-- MEMORY MATCH -->
+        <article class="card" id="memcard">
+          <h2>🧠 Memory Match</h2>
+          <p class="muted">Click two cards to reveal them. Match pairs to remove them. Try to finish with few flips.</p>
+
+          <div class="memory-grid" id="memory-grid" aria-label="memory grid">
+            <!-- tiles generated by JS -->
+          </div>
+
+          <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
+            <button class="btn small" id="mem-reset">Shuffle & Reset</button>
+            <div style="margin-left:auto" class="muted">Flips: <span id="mem-flips">0</span></div>
+          </div>
+        </article>
+      </section>
+
+      <!-- RIGHT: Sidebar -->
+      <aside class="sidebar">
+        <div class="card">
+          <h2>💡 Tips</h2>
+          <p class="hint">• Use the theme toggle to switch light/dark modes.</p>
+          <p class="hint">• Pause and think: Tic-Tac-Toe is easier to win if you start from a corner.</p>
+          <p class="hint">• Memory Match rewards focus — try to remember card positions.</p>
+        </div>
+
+        <div class="card">
+          <h2>🏆 Quick Design Notes</h2>
+          <p class="hint">• Clean typography and generous spacing make UI readable.</p>
+          <p class="hint">• Subtle motion improves perceived quality.</p>
+        </div>
+
+        <div class="card">
+          <h2>📣 Presenting</h2>
+          <p class="hint">Introduce each game: rules, interaction, and what makes it fun. Keep it short.</p>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      Made with care by <strong>[Your Name]</strong> • Good luck in your presentation!
+    </footer>
+  </div>
+
+  <script>
+    /* -------------------------
+       Preloader
+       ------------------------- */
+    window.addEventListener('load', () => {
+      const p = document.getElementById('preloader');
+      setTimeout(() => { p.classList.add('hidden'); }, 450);
+    });
+
+    /* -------------------------
+       Theme toggle & reset all
+       ------------------------- */
+    const app = document.getElementById('app');
+    const toggleTheme = document.getElementById('toggle-theme');
+    const resetAllBtn = document.getElementById('reset-all');
+
+    // store theme in localStorage
+    const saved = localStorage.getItem('mg_theme');
+    if (saved) app.setAttribute('data-theme', saved);
+
+    toggleTheme.addEventListener('click', () => {
+      const cur = app.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      app.setAttribute('data-theme', cur);
+      localStorage.setItem('mg_theme', cur);
+    });
+
+    /* -------------------------
+       Utility
+       ------------------------- */
+    function el(sel){ return document.querySelector(sel); }
+    function els(sel){ return Array.from(document.querySelectorAll(sel)); }
+
+    /* -------------------------
+       Tic Tac Toe (two players)
+       ------------------------- */
+    (function(){
+      const boardEl = document.getElementById('ttt-board');
+      const cells = Array.from(boardEl.children);
+      const statusTurn = document.getElementById('ttt-turn');
+      const resetBtn = document.getElementById('ttt-reset');
+
+      let board = Array(9).fill(null); // 'X' or 'O'
+      let turn = 'X';
+      let finished = false;
+
+      function render(){
+        cells.forEach((c,i)=> c.textContent = board[i] || '');
+        statusTurn.textContent = finished ? '-' : turn;
+      }
+
+      function checkWin(b){
+        const lines = [
+          [0,1,2],[3,4,5],[6,7,8],
+          [0,3,6],[1,4,7],[2,5,8],
+          [0,4,8],[2,4,6]
+        ];
+        for (let ln of lines){
+          const [a,b1,c] = ln;
+          if (b[a] && b[a] === b[b1] && b[a] === b[c]) return b[a];
+        }
+        if (b.every(Boolean)) return 'draw';
+        return null;
+      }
+
+      function handleClick(e){
+        if (finished) return;
+        const idx = +e.currentTarget.dataset.i;
+        if (board[idx]) return;
+        board[idx] = turn;
+        const winner = checkWin(board);
+        if (winner){
+          finished = true;
+          if (winner === 'draw') {
+            alert('Draw! Reset to play again.');
+          } else {
+            alert(winner + ' wins! Reset to play again.');
+          }
+        } else {
+          turn = (turn === 'X') ? 'O' : 'X';
+        }
+        render();
+      }
+
+      cells.forEach(c => c.addEventListener('click', handleClick));
+      resetBtn.addEventListener('click', () => {
+        board.fill(null); turn = 'X'; finished = false; render();
+      });
+
+      render();
+      // expose for reset-all
+      window._ttt_reset = () => resetBtn.click();
+    })();
+
+    /* -------------------------
+       Rock Paper Scissors (best of 3)
+       ------------------------- */
+    (function(){
+      const choices = ['rock','paper','scissors'];
+      const resultEl = document.getElementById('rps-result');
+      const scoreYou = document.getElementById('rps-score-you');
+      const scoreComp = document.getElementById('rps-score-comp');
+      const buttons = document.querySelectorAll('.rps-btn');
+      let you = 0, comp = 0;
+
+      function pickComp(){ return choices[Math.floor(Math.random()*3)]; }
+      function decide(a,b){
+        if (a === b) return 'tie';
+        if (a === 'rock' && b === 'scissors') return 'you';
+        if (a === 'paper' && b === 'rock') return 'you';
+        if (a === 'scissors' && b === 'paper') return 'you';
+        return 'comp';
+      }
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (you >= 2 || comp >= 2) return; // best of 3
+          const your = btn.dataset.move;
+          const their = pickComp();
+          const winner = decide(your, their);
+          if (winner === 'you') { you++; resultEl.textContent = `You chose ${your}. Computer chose ${their}. You win this round.`; }
+          else if (winner === 'comp') { comp++; resultEl.textContent = `You chose ${your}. Computer chose ${their}. Computer wins this round.`; }
+          else { resultEl.textContent = `Both chose ${your}. It's a tie.`; }
+          scoreYou.textContent = you;
+          scoreComp.textContent = comp;
+          if (you === 2 || comp === 2) {
+            setTimeout(()=> {
+              if (you > comp) alert('You win match! Reset to play again.');
+              else alert('Computer wins match! Reset to play again.');
+            }, 120);
+          }
+        });
+      });
+
+      document.getElementById('rps-reset').addEventListener('click', () => {
+        you = 0; comp = 0; scoreYou.textContent = '0'; scoreComp.textContent = '0';
+        resultEl.textContent = 'Make your choice to begin.';
+      });
+
+      // expose for reset-all
+      window._rps_reset = () => document.getElementById('rps-reset').click();
+    })();
+
+    /* -------------------------
+       Memory Match
+       ------------------------- */
+    (function(){
+      const gridEl = document.getElementById('memory-grid');
+      const flipsEl = document.getElementById('mem-flips');
+      const resetBtn = document.getElementById('mem-reset');
+
+      // emoji set (8 pairs)
+      const icons = ['🍎','🍓','🍇','🍋','🍉','🍒','🥝','🍍'];
+      let deck = [];
+      let flipped = [];
+      let matchedCount = 0;
+      let flips = 0;
+      let lock = false;
+
+      function shuffle(array){
+        for (let i = array.length - 1; i > 0; i--){
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+
+      function buildDeck(){
+        deck = icons.concat(icons); // pairs
+        shuffle(deck);
+      }
+
+      function render(){
+        gridEl.innerHTML = '';
+        deck.forEach((val, idx) => {
+          const tile = document.createElement('div');
+          tile.className = 'card-tile';
+          tile.dataset.idx = idx;
+
+          const inner = document.createElement('div');
+          inner.className = 'card-inner';
+
+          const front = document.createElement('div');
+          front.className = 'card-front';
+          front.textContent = ''; // face-down look
+
+          const back = document.createElement('div');
+          back.className = 'card-back';
+          back.textContent = val;
+
+          inner.appendChild(front);
+          inner.appendChild(back);
+          tile.appendChild(inner);
+
+          tile.addEventListener('click', () => onTileClick(tile, idx));
+          gridEl.appendChild(tile);
+        });
+        flipsEl.textContent = flips;
+      }
+
+      function onTileClick(tile, idx){
+        if (lock) return;
+        if (tile.classList.contains('matched')) return;
+        if (flipped.length === 1 && flipped[0].tile === tile) return; // same tile
+
+        // flip
+        tile.classList.add('flipped');
+        flipped.push({ tile, idx });
+
+        if (flipped.length === 2){
+          lock = true;
+          flips++;
+          flipsEl.textContent = flips;
+          const [a,b] = flipped;
+          const valA = deck[a.idx], valB = deck[b.idx];
+          if (valA === valB){
+            // match
+            setTimeout(() => {
+              a.tile.classList.add('matched');
+              b.tile.classList.add('matched');
+              matchedCount += 2;
+              flipped = [];
+              lock = false;
+              if (matchedCount === deck.length){
+                setTimeout(()=> alert(`You finished! Flips: ${flips}`),120);
+              }
+            }, 500);
+          } else {
+            // no match
+            setTimeout(() => {
+              a.tile.classList.remove('flipped');
+              b.tile.classList.remove('flipped');
+              flipped = [];
+              lock = false;
+            }, 700);
+          }
+        }
+      }
+
+      function reset(){
+        flips = 0; matchedCount = 0; flipped = []; lock = false;
+        buildDeck();
+        render();
+      }
+
+      resetBtn.addEventListener('click', reset);
+
+      reset();
+      // expose for reset-all
+      window._mem_reset = () => resetBtn.click();
+    })();
+
+    /* -------------------------
+       Reset All
+       ------------------------- */
+    resetAllBtn.addEventListener('click', () => {
+      if (confirm('Reset all games?')) {
+        window._ttt_reset && window._ttt_reset();
+        window._rps_reset && window._rps_reset();
+        window._mem_reset && window._mem_reset();
+      }
+    });
+
+    /* -------------------------
+       Accessibility: keyboard small helpers
+       ------------------------- */
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'r' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        resetAllBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>
